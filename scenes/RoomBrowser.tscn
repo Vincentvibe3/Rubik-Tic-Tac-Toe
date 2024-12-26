@@ -1,0 +1,323 @@
+[gd_scene load_steps=17 format=3 uid="uid://bhr3e46va61fu"]
+
+[ext_resource type="Script" path="res://scripts/AutoCubeController.gd" id="1_iecva"]
+[ext_resource type="Script" path="res://scripts/RoomBrowser.gd" id="2_rycbd"]
+[ext_resource type="Script" path="res://scripts/ShowGameCreation.gd" id="3_0xc7a"]
+[ext_resource type="Script" path="res://scripts/CreateRoom.gd" id="3_6c4f3"]
+[ext_resource type="Script" path="res://scripts/RefreshRoomList.gd" id="3_i0fra"]
+[ext_resource type="Script" path="res://scripts/EnterPassword.gd" id="5_1vmll"]
+[ext_resource type="Script" path="res://scripts/ServerAdressInput.gd" id="6_k12hj"]
+[ext_resource type="Script" path="res://scripts/GameBrowser.gd" id="6_pydll"]
+[ext_resource type="Script" path="res://scripts/SetServerSecure.gd" id="6_waqv8"]
+[ext_resource type="Script" path="res://scripts/SetNewServer.gd" id="7_lmhfg"]
+[ext_resource type="Script" path="res://scripts/BackToMainMenu.gd" id="8_mqn80"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sdpub"]
+bg_color = Color(0.488173, 0.585808, 0.609375, 0.784314)
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_wu7i7"]
+color = Color(0.859799, 0.859799, 0.859799, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4udfg"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mf0se"]
+
+[sub_resource type="Environment" id="Environment_356ov"]
+background_mode = 1
+background_color = Color(0.735912, 0.798144, 0.847221, 1)
+ambient_light_color = Color(1, 1, 1, 1)
+ssao_enabled = true
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_iecva")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 8
+mouse_filter = 1
+
+[node name="MultiplayerMenu" type="PanelContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_sdpub")
+
+[node name="GameBrowserHTTP" type="HTTPRequest" parent="Control/MultiplayerMenu"]
+unique_name_in_owner = true
+script = ExtResource("2_rycbd")
+
+[node name="MarginContainer" type="MarginContainer" parent="Control/MultiplayerMenu"]
+layout_mode = 2
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 50
+
+[node name="RoomCreation" type="VBoxContainer" parent="Control/MultiplayerMenu/MarginContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 0
+alignment = 1
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Control/MultiplayerMenu/MarginContainer/RoomCreation"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/MultiplayerMenu/MarginContainer/RoomCreation/HBoxContainer2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Create Game"
+
+[node name="HSeparator3" type="HSeparator" parent="Control/MultiplayerMenu/MarginContainer/RoomCreation"]
+layout_mode = 2
+theme_override_constants/separation = 15
+theme_override_styles/separator = SubResource("StyleBoxLine_wu7i7")
+
+[node name="GameName" type="LineEdit" parent="Control/MultiplayerMenu/MarginContainer/RoomCreation"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Room name"
+
+[node name="HSeparator2" type="HSeparator" parent="Control/MultiplayerMenu/MarginContainer/RoomCreation"]
+layout_mode = 2
+theme_override_constants/separation = 10
+theme_override_styles/separator = SubResource("StyleBoxEmpty_4udfg")
+
+[node name="GamePassword" type="LineEdit" parent="Control/MultiplayerMenu/MarginContainer/RoomCreation"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Password (leave empty for none)"
+
+[node name="HSeparator" type="HSeparator" parent="Control/MultiplayerMenu/MarginContainer/RoomCreation"]
+layout_mode = 2
+theme_override_constants/separation = 20
+theme_override_styles/separator = SubResource("StyleBoxEmpty_4udfg")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/MultiplayerMenu/MarginContainer/RoomCreation"]
+layout_mode = 2
+alignment = 1
+
+[node name="Button" type="Button" parent="Control/MultiplayerMenu/MarginContainer/RoomCreation/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Create"
+script = ExtResource("3_6c4f3")
+
+[node name="Button2" type="Button" parent="Control/MultiplayerMenu/MarginContainer/RoomCreation/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Cancel"
+script = ExtResource("3_0xc7a")
+metadata/menu = NodePath("../../../GameBrowser")
+
+[node name="PrivateGameEntry" type="VBoxContainer" parent="Control/MultiplayerMenu/MarginContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 0
+alignment = 1
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Control/MultiplayerMenu/MarginContainer/PrivateGameEntry"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/MultiplayerMenu/MarginContainer/PrivateGameEntry/HBoxContainer2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Connect"
+
+[node name="HSeparator3" type="HSeparator" parent="Control/MultiplayerMenu/MarginContainer/PrivateGameEntry"]
+layout_mode = 2
+theme_override_constants/separation = 15
+theme_override_styles/separator = SubResource("StyleBoxLine_wu7i7")
+
+[node name="PasswordEntry" type="LineEdit" parent="Control/MultiplayerMenu/MarginContainer/PrivateGameEntry"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Password (leave empty for none)"
+
+[node name="HSeparator" type="HSeparator" parent="Control/MultiplayerMenu/MarginContainer/PrivateGameEntry"]
+layout_mode = 2
+theme_override_constants/separation = 20
+theme_override_styles/separator = SubResource("StyleBoxEmpty_4udfg")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/MultiplayerMenu/MarginContainer/PrivateGameEntry"]
+layout_mode = 2
+alignment = 1
+
+[node name="Button" type="Button" parent="Control/MultiplayerMenu/MarginContainer/PrivateGameEntry/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Join"
+script = ExtResource("5_1vmll")
+metadata/onPasswordScreen = true
+
+[node name="Button2" type="Button" parent="Control/MultiplayerMenu/MarginContainer/PrivateGameEntry/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Cancel"
+script = ExtResource("3_0xc7a")
+metadata/menu = NodePath("../../../GameBrowser")
+
+[node name="ServerEntry" type="VBoxContainer" parent="Control/MultiplayerMenu/MarginContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 0
+alignment = 1
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Control/MultiplayerMenu/MarginContainer/ServerEntry"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/MultiplayerMenu/MarginContainer/ServerEntry/HBoxContainer2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Change Server"
+
+[node name="HSeparator3" type="HSeparator" parent="Control/MultiplayerMenu/MarginContainer/ServerEntry"]
+layout_mode = 2
+theme_override_constants/separation = 15
+theme_override_styles/separator = SubResource("StyleBoxLine_wu7i7")
+
+[node name="ServerAddress" type="LineEdit" parent="Control/MultiplayerMenu/MarginContainer/ServerEntry"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Server address"
+script = ExtResource("6_k12hj")
+
+[node name="HSeparator" type="HSeparator" parent="Control/MultiplayerMenu/MarginContainer/ServerEntry"]
+layout_mode = 2
+theme_override_constants/separation = 10
+theme_override_styles/separator = SubResource("StyleBoxEmpty_4udfg")
+
+[node name="SecureButton" type="CheckButton" parent="Control/MultiplayerMenu/MarginContainer/ServerEntry"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/h_separation = 10
+text = "Secure connection (HTTPS)"
+script = ExtResource("6_waqv8")
+
+[node name="HSeparator2" type="HSeparator" parent="Control/MultiplayerMenu/MarginContainer/ServerEntry"]
+layout_mode = 2
+theme_override_constants/separation = 20
+theme_override_styles/separator = SubResource("StyleBoxEmpty_4udfg")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/MultiplayerMenu/MarginContainer/ServerEntry"]
+layout_mode = 2
+alignment = 1
+
+[node name="Button" type="Button" parent="Control/MultiplayerMenu/MarginContainer/ServerEntry/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Set"
+script = ExtResource("7_lmhfg")
+metadata/onPasswordScreen = true
+
+[node name="Button2" type="Button" parent="Control/MultiplayerMenu/MarginContainer/ServerEntry/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Cancel"
+script = ExtResource("3_0xc7a")
+metadata/menu = NodePath("../../../GameBrowser")
+
+[node name="GameBrowser" type="VBoxContainer" parent="Control/MultiplayerMenu/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+script = ExtResource("6_pydll")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/MultiplayerMenu/MarginContainer/GameBrowser"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/MultiplayerMenu/MarginContainer/GameBrowser/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Game Browser"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/MultiplayerMenu/MarginContainer/GameBrowser/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 10
+
+[node name="Button5" type="Button" parent="Control/MultiplayerMenu/MarginContainer/GameBrowser/HBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 10
+size_flags_vertical = 4
+text = "Change Server"
+script = ExtResource("3_0xc7a")
+metadata/menu = NodePath("../../../../ServerEntry")
+
+[node name="VSeparator3" type="VSeparator" parent="Control/MultiplayerMenu/MarginContainer/GameBrowser/HBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+theme_override_styles/separator = SubResource("StyleBoxEmpty_mf0se")
+
+[node name="Button4" type="Button" parent="Control/MultiplayerMenu/MarginContainer/GameBrowser/HBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 10
+size_flags_vertical = 4
+text = "Refresh
+"
+script = ExtResource("3_i0fra")
+
+[node name="VSeparator2" type="VSeparator" parent="Control/MultiplayerMenu/MarginContainer/GameBrowser/HBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+theme_override_styles/separator = SubResource("StyleBoxEmpty_mf0se")
+
+[node name="Button3" type="Button" parent="Control/MultiplayerMenu/MarginContainer/GameBrowser/HBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 10
+size_flags_vertical = 4
+text = "Create Game"
+script = ExtResource("3_0xc7a")
+metadata/menu = NodePath("../../../../RoomCreation")
+
+[node name="VSeparator" type="VSeparator" parent="Control/MultiplayerMenu/MarginContainer/GameBrowser/HBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+theme_override_styles/separator = SubResource("StyleBoxEmpty_mf0se")
+
+[node name="Button2" type="Button" parent="Control/MultiplayerMenu/MarginContainer/GameBrowser/HBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 10
+size_flags_vertical = 4
+text = "Back"
+script = ExtResource("8_mqn80")
+
+[node name="HSeparator" type="HSeparator" parent="Control/MultiplayerMenu/MarginContainer/GameBrowser"]
+layout_mode = 2
+theme_override_constants/separation = 15
+theme_override_styles/separator = SubResource("StyleBoxLine_wu7i7")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Control/MultiplayerMenu/MarginContainer/GameBrowser"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="GameList" type="VBoxContainer" parent="Control/MultiplayerMenu/MarginContainer/GameBrowser/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LoadErrorMessage" type="Label" parent="Control/MultiplayerMenu/MarginContainer/GameBrowser/ScrollContainer/GameList"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 20, 0)
+light_energy = 0.5
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_356ov")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(-0.707107, 0.5, -0.5, 0, 0.707107, 0.707107, 0.707107, 0.5, -0.5, -10, 15, -10)
+projection = 1
+size = 20.0

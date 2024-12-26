@@ -1,0 +1,16 @@
+[gd_scene load_steps=4 format=3 uid="uid://das4y2albxqcx"]
+
+[ext_resource type="Script" path="res://scripts/DrawCubeSides.gd" id="2_5nte4"]
+[ext_resource type="ArrayMesh" uid="uid://dqgm6oqeqhmhi" path="res://3D assets/meshes/cube_Cube.res" id="3_uxggh"]
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_laedi"]
+points = PackedVector3Array(1, 1, 1, 1, 1, -1, -1, 1, 1, 1, -1, 1, 1, -1, -1, -1, 1, -1, -1, -1, 1, -1, -1, -1)
+
+[node name="RigidBody3D" type="RigidBody3D"]
+script = ExtResource("2_5nte4")
+
+[node name="CubeMesh" type="MeshInstance3D" parent="."]
+mesh = ExtResource("3_uxggh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("ConvexPolygonShape3D_laedi")

@@ -1,0 +1,81 @@
+[gd_scene load_steps=8 format=3 uid="uid://v1ko7h4p5j04"]
+
+[ext_resource type="Script" path="res://scripts/ErrorScreen.gd" id="1_u860v"]
+[ext_resource type="Script" path="res://scripts/BackToMainMenu.gd" id="2_njofr"]
+[ext_resource type="PackedScene" uid="uid://c1d5aige5qg4r" path="res://scenes/MainMenu.tscn" id="3_oaeyx"]
+[ext_resource type="Script" path="res://scripts/AutoCubeController.gd" id="4_26hi5"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xusat"]
+bg_color = Color(0.152941, 0.184314, 0.192157, 0.960784)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_haiul"]
+
+[sub_resource type="Environment" id="Environment_f47jw"]
+background_mode = 1
+background_color = Color(0.735912, 0.798144, 0.847221, 1)
+ambient_light_color = Color(1, 1, 1, 1)
+ssao_enabled = true
+
+[node name="Node3D" type="Node3D"]
+script = ExtResource("1_u860v")
+
+[node name="ErrorScreen" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="ErrorScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_xusat")
+
+[node name="MarginContainer" type="MarginContainer" parent="ErrorScreen/PanelContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ErrorScreen/PanelContainer/MarginContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="ErrorMessage" type="Label" parent="ErrorScreen/PanelContainer/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="ErrorScreen/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+theme_override_styles/separator = SubResource("StyleBoxEmpty_haiul")
+
+[node name="Button" type="Button" parent="ErrorScreen/PanelContainer/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+text = "Back to main menu"
+script = ExtResource("2_njofr")
+metadata/scene = ExtResource("3_oaeyx")
+
+[node name="Node3D" type="Node3D" parent="."]
+script = ExtResource("4_26hi5")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Node3D"]
+transform = Transform3D(-0.866024, -0.433016, 0.250001, 0, 0.499998, 0.866026, -0.500003, 0.749999, -0.43301, 0, 20, 0)
+light_energy = 0.5
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Node3D"]
+environment = SubResource("Environment_f47jw")
+
+[node name="Camera3D" type="Camera3D" parent="Node3D"]
+transform = Transform3D(-0.707107, 0.5, -0.5, 0, 0.707107, 0.707107, 0.707107, 0.5, -0.5, -10, 15, -10)
+projection = 1
+size = 20.0

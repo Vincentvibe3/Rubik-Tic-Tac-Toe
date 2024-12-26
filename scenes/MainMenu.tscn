@@ -1,0 +1,100 @@
+[gd_scene load_steps=9 format=3 uid="uid://c1d5aige5qg4r"]
+
+[ext_resource type="Script" path="res://scripts/AutoCubeController.gd" id="1_mbcvk"]
+[ext_resource type="Script" path="res://scripts/StartGame.gd" id="3_lsqnr"]
+[ext_resource type="PackedScene" uid="uid://dx6v4jca81sv3" path="res://scenes/Game.tscn" id="4_jfioo"]
+[ext_resource type="PackedScene" uid="uid://bhr3e46va61fu" path="res://scenes/RoomBrowser.tscn" id="5_v6hhr"]
+[ext_resource type="Script" path="res://scripts/RegisterWinScreen.gd" id="6_ie0ia"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sdpub"]
+bg_color = Color(0.568627, 0.682353, 0.709804, 0.47451)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8ewo4"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="Environment" id="Environment_356ov"]
+background_mode = 1
+background_color = Color(0.735912, 0.798144, 0.847221, 1)
+ambient_light_color = Color(1, 1, 1, 1)
+ssao_enabled = true
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_mbcvk")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 8
+mouse_filter = 1
+
+[node name="TitleScreen" type="PanelContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_sdpub")
+script = ExtResource("6_ie0ia")
+
+[node name="MarginContainer" type="MarginContainer" parent="Control/TitleScreen"]
+layout_mode = 2
+theme_override_constants/margin_left = 100
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/TitleScreen/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
+alignment = 1
+
+[node name="Game Title" type="Label" parent="Control/TitleScreen/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 40
+text = "Rubik's Tic Tac Toe"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="Control/TitleScreen/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+theme_override_styles/separator = SubResource("StyleBoxFlat_8ewo4")
+
+[node name="SceneSwitchButton" type="Button" parent="Control/TitleScreen/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Play"
+script = ExtResource("3_lsqnr")
+scene = ExtResource("4_jfioo")
+
+[node name="HSeparator2" type="HSeparator" parent="Control/TitleScreen/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+theme_override_styles/separator = SubResource("StyleBoxFlat_8ewo4")
+
+[node name="SceneSwitchButton2" type="Button" parent="Control/TitleScreen/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Play Online"
+script = ExtResource("3_lsqnr")
+scene = ExtResource("5_v6hhr")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 20, 0)
+light_energy = 0.5
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_356ov")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(-0.707107, 0.5, -0.5, 0, 0.707107, 0.707107, 0.707107, 0.5, -0.5, -5.89667, 15, -14.1033)
+projection = 1
+size = 20.0
