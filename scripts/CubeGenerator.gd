@@ -22,9 +22,6 @@ var isDragging = false
 
 var lastRotationDirection = "L"
 
-var highlightColor = Color8(197, 220, 222)
-var selectionColor = Color8(255, 216, 99)
-
 var x_rotation = 0
 var y_rotation = 0
 
@@ -47,6 +44,7 @@ func _ready() -> void:
 					continue
 				var drawableCube = load("res://scenes/Cube.tscn").instantiate()
 				drawableCube.cube_position = [k, j, i]
+				drawableCube.cube_owner = self
 				var size = drawableCube.getSize()
 				cubeSize = size
 				self.add_child(drawableCube)
@@ -59,10 +57,16 @@ func reset():
 	for cube in cubes:
 		cube.reset()
 
+func resetSelection():
+	if current_selection != null:
+		current_selection.reset_selection()
+
 func _on_select(cube):
+	resetSelection()
 	resetLayer()
 	GameState.highlight_last_clicked()
 	current_selection = cube
+	cube.drawSelect()
 	highlightLayer()
 	render3DControls()
 
@@ -98,44 +102,44 @@ func highlightLayer():
 		for child in cubes:
 			var coord = child.cube_position;
 			if coord == selection_indices:
-				child.highlight(selectionColor)
+				child.highlight(GameState.selectionMaterial)
 			elif coord[2] == index:
-				child.highlight(highlightColor)
+				child.highlight(GameState.highlightMaterial)
 
 	elif currentRotationAxis == "z":
 		var index = selection_indices[1]
 		for child in cubes:
 			var coord = child.cube_position;
 			if coord == selection_indices:
-				child.highlight(selectionColor)
+				child.highlight(GameState.selectionMaterial)
 			elif coord[1] == index:
-				child.highlight(highlightColor)
+				child.highlight(GameState.highlightMaterial)
 
 	elif currentRotationAxis == "x":
 		var index = selection_indices[0]
 		for child in cubes:
 			var coord = child.cube_position;
 			if coord == selection_indices:
-				child.highlight(selectionColor)
+				child.highlight(GameState.selectionMaterial)
 			elif coord[0] == index:
-				child.highlight(highlightColor)
+				child.highlight(GameState.highlightMaterial)
 
 func render3DControls():
 	if !auto:
 		%RotateControls.set_active_axis(currentRotationAxis)
-		%RotateControlGroup.visible = true
+		%ControlGroup.visible = true
 		%RotateControlsHint.visible = false
 
 func hide3DControls():
 	if !auto:
-		%RotateControlGroup.visible = false
+		%ControlGroup.visible = false
 		%RotateControlsHint.visible = true
 
 func _on_set_rotation_axis(axis: String):
-	GameState.highlight_last_clicked()
 	if current_selection != null:
 		resetLayer()
 	currentRotationAxis = axis
+	GameState.highlight_last_clicked()
 	highlightLayer()
 	render3DControls()
 
@@ -155,7 +159,7 @@ func _rotate_drag(x_delta:float, y_delta:float):
 	# tween = get_tree().create_tween()
 	targetCubeTransform = self.global_transform.rotated(Vector3(0, 1, 0).normalized(), x_rotation_delta)
 	targetCubeTransform = targetCubeTransform.rotated(Vector3(-1, 0, 1).normalized(), y_rotation_delta)
-	self.global_transform = targetCubeTransform
+	self.global_transform = targetCubeTransform.orthonormalized()
 	# tween.tween_property(self, "global_transform", targetCubeTransform, 0.25).set_ease(Tween.EASE_OUT)
 	# tween.connect("finished", func (): gameCubeRotationDone.emit())
 
@@ -204,7 +208,6 @@ func rotate_indices(axis_1: int, axis_2: int, coord):
 func _on_rotate_done():
 	rotatingLayer = false
 	resetLayer()
-	hide3DControls()
 	if !auto:
 		GameState.on_rotate(currentRotationAxis, current_selection.cube_position, lastRotationDirection)
 	current_selection = null
@@ -266,3 +269,5 @@ func _on_rotate_request(direction) -> void:
 			angle = PI / 2
 		new_transform = new_transform.rotated(rotationaxis.normalized(), angle)
 		group.set_target_transform(new_transform)
+		resetSelection()
+		GameState._on_rotate_start()

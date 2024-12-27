@@ -12,4 +12,5 @@ func _on_press() -> void:
 	var password = %GamePassword.text
 	if !password.is_empty():
 		GameState.room_password = %GamePassword.text
+		%GamePassword.text = ""
 	get_tree().change_scene_to_file("res://scenes/GameOnline.tscn")

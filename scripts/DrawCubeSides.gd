@@ -2,24 +2,24 @@ extends RigidBody3D
 
 class_name DrawableCube
 
-signal face_clicked(normal: Vector3)
-signal selected()
+signal selected(normal: Vector3)
 
 var cube_position
 var played={}
+var cube_owner
+
+var selectedFace
+var selectedDecal
 
 var t = 0
 
 func _input_event(_camera: Camera3D, event: InputEvent, _event_position: Vector3, normal: Vector3, _shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.is_pressed() and event.button_index == MOUSE_BUTTON_LEFT:
-		self.emit_signal("face_clicked", normal)
-	elif event is InputEventMouseButton and event.is_pressed() and event.button_index == MOUSE_BUTTON_RIGHT:
-		self.emit_signal("selected")
+		self.emit_signal("selected", normal)
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	disableGravity()
-	face_clicked.connect(_on_face_clicked)
 	selected.connect(_on_selected)
 
 func reset_position():
@@ -47,6 +47,8 @@ func reset():
 	for child in self.get_children():
 		if child is Decal:
 			self.remove_child(child)
+	selectedDecal = null
+	selectedFace = null
 	played.clear()
 	disableGravity()
 	call_deferred("reset_position")
@@ -61,19 +63,31 @@ func checkSide(normal:Vector3):
 			return played[side]
 	return null
 
-func highlight(color:Color):
+func highlight_color(color:Color):
 	var mat = StandardMaterial3D.new()
 	mat.albedo_color = color
 	mat.blend_mode = BaseMaterial3D.BLEND_MODE_MUL
 	$CubeMesh.material_overlay = mat
 
-func _on_selected() -> void:
-	get_node("/root/Main/CubeGen").emit_signal("selection", self)
+func highlight(material:StandardMaterial3D):
+	$CubeMesh.material_overlay = material
+
+func _on_selected(normal: Vector3) -> void:
+	var local_normal = self.to_local(normal)-self.to_local(Vector3.ZERO)
+	selectedFace = local_normal
+	cube_owner.emit_signal("selection", self)
 
 func reset_color():
 	$CubeMesh.material_overlay = null
 
-func mark_face(local_normal):
+func reset_selection():
+	if selectedDecal != null:
+		remove_child(selectedDecal)
+		selectedDecal = null
+
+func get_face(local_normal):
+	print("local")
+	print(local_normal)
 	var size = $CubeMesh.get_aabb().get_longest_axis_size()
 	var faces = [
 		[Vector3.RIGHT, Vector3(size/2, 0, 0)],
@@ -83,7 +97,15 @@ func mark_face(local_normal):
 		[Vector3.BACK, Vector3(0, 0, size/2)],
 		[Vector3.FORWARD, Vector3(0, 0, -size/2)],
 	]
-	
+	var face_data 
+	for face in faces:
+		if local_normal.is_equal_approx(face[0]):
+			face_data = face
+			break
+	return face_data
+
+func drawDecal(face_data, local_normal, decal):
+	var size = $CubeMesh.get_aabb().get_longest_axis_size()
 	var rotation_axes = [
 		Vector3.LEFT,
 		Vector3.UP,
@@ -96,11 +118,29 @@ func mark_face(local_normal):
 			in_plane = parallel_candidate
 			break
 
-	var face_data 
-	for face in faces:
-		if local_normal.is_equal_approx(face[0]):
-			face_data = face
-			break
+	# decal.modulate = Color(0, 0, 0)
+	decal.lower_fade = 0
+	decal.upper_fade = 1
+	decal.emission_energy = 0
+	decal.size = Vector3(size, 0.1, size)
+	self.add_child(decal)
+	decal.position = face_data[1]
+	decal.basis.x = in_plane
+	decal.basis.y = -local_normal
+	decal.basis.z = local_normal.cross(in_plane)
+
+func drawSelect():
+	if selectedFace != null:
+		var face_data = get_face(selectedFace)
+		print(face_data)
+		var decal:Decal = Decal.new()	
+		selectedDecal = decal
+		print(selectedDecal)
+		decal.texture_albedo = load("res://Textures/Selection.png")
+		drawDecal(face_data, selectedFace, decal)
+
+func mark_face(local_normal):
+	var face_data = get_face(local_normal)
 	if played.has(face_data[0]):
 		return
 	var decal:Decal = Decal.new()
@@ -108,17 +148,8 @@ func mark_face(local_normal):
 		decal.texture_albedo = load("res://Textures/Circle_alpha.png")
 	else:
 		decal.texture_albedo = load("res://Textures/Cross_alpha.png")
-	decal.modulate = Color(0, 0, 0)
-	decal.lower_fade = 0
-	decal.upper_fade = 1
-	decal.emission_energy = 0
-	decal.size = Vector3(size, 0.1, size)
 	played[face_data[0]] = GameState.currentPlayer
-	self.add_child(decal)
-	decal.position = face_data[1]
-	decal.basis.x = in_plane
-	decal.basis.y = -local_normal
-	decal.basis.z = local_normal.cross(in_plane)
+	drawDecal(face_data, local_normal, decal)
 	GameState.on_mark(local_normal, cube_position)
 
 func _on_face_clicked(normal: Vector3) -> void:

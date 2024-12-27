@@ -26,6 +26,17 @@ var isInsecure = false
 
 var actionqueue = []
 
+var highlightColor = Color8(197, 220, 222)
+var selectionColor = Color8(255, 216, 99)
+var lastMoveColor = Color8(149, 211, 157)
+var highlightMaterial = StandardMaterial3D.new()
+var selectionMaterial = StandardMaterial3D.new()
+var lastMoveMaterial = StandardMaterial3D.new()
+
+var audio
+var bgm
+var muted = false
+
 # normal vector, layer index, layer axis
 var faces = [
 	[Vector3.LEFT, 0, 0],
@@ -35,6 +46,17 @@ var faces = [
 	[Vector3.UP, 2, 2],
 	[Vector3.DOWN, 0, 2],
 ]
+
+func _ready() -> void:
+	highlightMaterial.albedo_color = highlightColor
+	highlightMaterial.blend_mode = BaseMaterial3D.BLEND_MODE_MUL
+	selectionMaterial.albedo_color = selectionColor
+	selectionMaterial.blend_mode = BaseMaterial3D.BLEND_MODE_MUL
+	lastMoveMaterial.albedo_color = lastMoveColor
+	lastMoveMaterial.blend_mode = BaseMaterial3D.BLEND_MODE_MUL
+
+func toggle_mute():
+	muted = !muted
 
 func close_ws():
 	if is_multiplayer:
@@ -64,10 +86,16 @@ func _process(_delta: float) -> void:
 func queue_action(obj, method, args):
 	actionqueue.append([obj, method, args])
 
-func mark_face(coord, face_normal):
+func mark_selection():
+	mark_face(gameCube.current_selection.cube_position, gameCube.current_selection.selectedFace, true)
+
+func mark_face(coord, face_normal, force=false):
 	for cube in cubes:
 		if cube.cube_position[0] == coord[0] && cube.cube_position[1] == coord[1] && cube.cube_position[2] == coord[2]:
-			queue_action(cube, "mark_face", [face_normal])
+			if force:
+				cube.mark_face(face_normal)
+			else:
+				queue_action(cube, "mark_face", [face_normal])
 			break
 
 func rotate_layer(cube, axis, direction):
@@ -86,7 +114,8 @@ func highlight_last_clicked():
 	if lastClickedCube != null:
 		for cube in cubes:
 			if cube.cube_position[0] == coord[0] && cube.cube_position[1] == coord[1] && cube.cube_position[2] == coord[2]:
-				cube.highlight(Color8(149, 211, 157))
+				print("highlighted")
+				cube.highlight(lastMoveMaterial)
 
 func reset_last_clicked():
 	var coord = lastClickedCube
@@ -97,26 +126,33 @@ func reset_last_clicked():
 	lastClickedCube = null
 
 func on_mark(local_normal, coord):
-	if !gameStarted:
-		return
-	if is_multiplayer:
-		if (is_host && currentPlayer == 0) || (!is_host && currentPlayer == 1):
-			wshandler.send({"id":2, "payload":{"coord":coord, "normal":[local_normal.x, local_normal.y, local_normal.z]}})
+	if audio != null:
+		audio.play_marker()
 	gameCube.resetLayer()
+	gameCube.resetSelection()
+	gameCube.hide3DControls()
 	reset_last_clicked()
 	lastClickedCube = coord
 	highlight_last_clicked()
-	GameState.changeTurn()
+	if gameStarted:
+		if is_multiplayer:
+			if (is_host && currentPlayer == 0) || (!is_host && currentPlayer == 1):
+				wshandler.send({"id":2, "payload":{"coord":coord, "normal":[local_normal.x, local_normal.y, local_normal.z]}})
+		GameState.changeTurn()
+
+func _on_rotate_start():
+	if audio != null:
+		audio.play_wood()
 
 func on_rotate(axis, coord, direction):
-	if !gameStarted:
-		return
-	if is_multiplayer:
-		if (is_host && currentPlayer == 0) || (!is_host && currentPlayer == 1):
-			wshandler.send({"id":3, "payload":{"axis":axis, "coord":coord, "direction":direction}})
+	gameCube.hide3DControls()
 	gameCube.resetLayer()
 	reset_last_clicked()
-	GameState.changeTurn()
+	if gameStarted:
+		if is_multiplayer:
+			if (is_host && currentPlayer == 0) || (!is_host && currentPlayer == 1):
+				wshandler.send({"id":3, "payload":{"axis":axis, "coord":coord, "direction":direction}})
+		GameState.changeTurn()
 
 func startGame():
 	gameStarted = true
@@ -186,6 +222,8 @@ func reset():
 		slider.value = 0
 
 func explodeCube():
+	if audio != null:
+		audio.play_explosion()
 	for cube in cubes:
 		cube.enableGravity()
 		cube.apply_central_impulse(Vector3(randi()%20, randi()%25, randi()%20))

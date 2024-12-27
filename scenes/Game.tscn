@@ -1,16 +1,20 @@
-[gd_scene load_steps=21 format=3 uid="uid://dx6v4jca81sv3"]
+[gd_scene load_steps=25 format=3 uid="uid://dx6v4jca81sv3"]
 
 [ext_resource type="Script" path="res://scripts/CubeGenerator.gd" id="1_wkfav"]
 [ext_resource type="Script" path="res://scripts/UpdateText.gd" id="1_ym7lh"]
+[ext_resource type="Script" path="res://scripts/PlaceMove.gd" id="1_ytx5r"]
 [ext_resource type="Script" path="res://scripts/SetRotationAxis.gd" id="2_1uo3i"]
 [ext_resource type="Script" path="res://scripts/RotateSlider.gd" id="2_d7fle"]
 [ext_resource type="Script" path="res://scripts/RotationControls.gd" id="4_m2nm8"]
-[ext_resource type="Script" path="res://scripts/InputBlocker.gd" id="5_je44m"]
 [ext_resource type="Script" path="res://scripts/BackToMainMenu.gd" id="6_hi3rp"]
 [ext_resource type="Script" path="res://scripts/RegisterWinScreen.gd" id="6_p88jo"]
+[ext_resource type="Script" path="res://scripts/MuteMusic.gd" id="6_tat81"]
 [ext_resource type="Script" path="res://scripts/ResetButton.gd" id="7_xljt2"]
 [ext_resource type="PackedScene" uid="uid://dutnhujkmabmb" path="res://scenes/Arrow.tscn" id="8_rmwg0"]
 [ext_resource type="Script" path="res://scripts/ShowTutorial.gd" id="9_3dvl0"]
+[ext_resource type="Script" path="res://scripts/AudioPlayer.gd" id="12_0cjwp"]
+[ext_resource type="AudioStream" uid="uid://ltm7af4el28k" path="res://sounds/bgm.wav" id="13_ljgf7"]
+[ext_resource type="Script" path="res://scripts/bgm.gd" id="15_ahyhv"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xkbfk"]
 bg_color = Color(0.0627451, 0.0627451, 0.0627451, 0.443137)
@@ -20,11 +24,11 @@ bg_color = Color(0, 0, 0, 0.392157)
 corner_radius_top_left = 10
 corner_detail = 10
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_o6j5u"]
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pg3q0"]
 bg_color = Color(0, 0, 0, 0.392157)
 corner_detail = 10
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_s4so4"]
 
 [sub_resource type="InputEventKey" id="InputEventKey_44wj8"]
 device = -1
@@ -83,8 +87,7 @@ offset_right = 133.5
 offset_bottom = 121.0
 grow_horizontal = 2
 size_flags_horizontal = 4
-text = "Right Click to set an X or O
-Left Click to select a cube to rotate
+text = "Left Click to Select a cube
 Drag with Middle Click to rotate"
 horizontal_alignment = 1
 
@@ -144,13 +147,30 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -412.0
-offset_top = -115.0
+offset_top = -121.0
 offset_right = -273.0
-offset_bottom = -66.0
+offset_bottom = -72.0
 grow_horizontal = 0
 grow_vertical = 0
 text = "Change layer with
- the buttons"
+ the button"
+horizontal_alignment = 2
+
+[node name="Label6" type="Label" parent="Control/TutorialScreen/Control"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -412.0
+offset_top = -61.0
+offset_right = -273.0
+offset_bottom = -12.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "Mark a side with
+the button"
 horizontal_alignment = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="Control"]
@@ -173,25 +193,25 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="RotateControlGroup" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer"]
+[node name="ControlGroup" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 size_flags_vertical = 8
 alignment = 1
 
-[node name="Label" type="Label" parent="Control/PanelContainer/MarginContainer/RotateControlGroup"]
+[node name="Label" type="Label" parent="Control/PanelContainer/MarginContainer/ControlGroup"]
 layout_mode = 2
 text = "Rotate Layer
 "
 horizontal_alignment = 1
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="Control/PanelContainer/MarginContainer/RotateControlGroup"]
+[node name="SubViewportContainer" type="SubViewportContainer" parent="Control/PanelContainer/MarginContainer/ControlGroup"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
-[node name="SubViewport" type="SubViewport" parent="Control/PanelContainer/MarginContainer/RotateControlGroup/SubViewportContainer"]
+[node name="SubViewport" type="SubViewport" parent="Control/PanelContainer/MarginContainer/ControlGroup/SubViewportContainer"]
 transparent_bg = true
 handle_input_locally = false
 msaa_2d = 3
@@ -200,72 +220,73 @@ physics_object_picking = true
 size = Vector2i(100, 100)
 render_target_update_mode = 0
 
-[node name="RotateControls" type="Node3D" parent="Control/PanelContainer/MarginContainer/RotateControlGroup/SubViewportContainer/SubViewport"]
+[node name="RotateControls" type="Node3D" parent="Control/PanelContainer/MarginContainer/ControlGroup/SubViewportContainer/SubViewport"]
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0, -30)
 script = ExtResource("4_m2nm8")
 
-[node name="ArrowTorus" parent="Control/PanelContainer/MarginContainer/RotateControlGroup/SubViewportContainer/SubViewport/RotateControls" instance=ExtResource("8_rmwg0")]
+[node name="ArrowTorus" parent="Control/PanelContainer/MarginContainer/ControlGroup/SubViewportContainer/SubViewport/RotateControls" instance=ExtResource("8_rmwg0")]
 transform = Transform3D(-1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 0, 0, 1, 0, 0, -0.25)
 visible = false
 skeleton = NodePath("../../../../../../../..")
 metadata/axis = "y"
 metadata/dir = "R"
 
-[node name="ArrowTorus3" parent="Control/PanelContainer/MarginContainer/RotateControlGroup/SubViewportContainer/SubViewport/RotateControls" instance=ExtResource("8_rmwg0")]
+[node name="ArrowTorus3" parent="Control/PanelContainer/MarginContainer/ControlGroup/SubViewportContainer/SubViewport/RotateControls" instance=ExtResource("8_rmwg0")]
 transform = Transform3D(-1, 8.74228e-08, 0, 8.74228e-08, 1, 8.74228e-08, 7.64274e-15, 8.74228e-08, -1, 0, 0, 0.25)
 visible = false
 skeleton = NodePath("../../../../../../../..")
 metadata/axis = "y"
 metadata/dir = "L"
 
-[node name="ArrowTorus2" parent="Control/PanelContainer/MarginContainer/RotateControlGroup/SubViewportContainer/SubViewport/RotateControls" instance=ExtResource("8_rmwg0")]
+[node name="ArrowTorus2" parent="Control/PanelContainer/MarginContainer/ControlGroup/SubViewportContainer/SubViewport/RotateControls" instance=ExtResource("8_rmwg0")]
 transform = Transform3D(1.91069e-15, -4.37114e-08, 1, -1, -4.37114e-08, 0, 4.37114e-08, -1, -4.37114e-08, -0.25, 0, 0)
 visible = false
 skeleton = NodePath("../../../../../../../..")
 metadata/axis = "z"
 metadata/dir = "R"
 
-[node name="ArrowTorus4" parent="Control/PanelContainer/MarginContainer/RotateControlGroup/SubViewportContainer/SubViewport/RotateControls" instance=ExtResource("8_rmwg0")]
+[node name="ArrowTorus4" parent="Control/PanelContainer/MarginContainer/ControlGroup/SubViewportContainer/SubViewport/RotateControls" instance=ExtResource("8_rmwg0")]
 transform = Transform3D(1.91069e-15, -4.37114e-08, -1, -1, -4.37114e-08, 0, -4.37114e-08, 1, -4.37114e-08, 0.25, 0, 0)
 visible = false
 skeleton = NodePath("../../../../../../../..")
 metadata/axis = "z"
 metadata/dir = "L"
 
-[node name="ArrowTorus5" parent="Control/PanelContainer/MarginContainer/RotateControlGroup/SubViewportContainer/SubViewport/RotateControls" instance=ExtResource("8_rmwg0")]
+[node name="ArrowTorus5" parent="Control/PanelContainer/MarginContainer/ControlGroup/SubViewportContainer/SubViewport/RotateControls" instance=ExtResource("8_rmwg0")]
 transform = Transform3D(4.37114e-08, -1, -8.74227e-08, -1, -4.37114e-08, 0, -3.82137e-15, 8.74228e-08, -1, 0, 0, 0.25)
 visible = false
 skeleton = NodePath("../../../../../../../..")
 metadata/axis = "x"
 metadata/dir = "R"
 
-[node name="ArrowTorus6" parent="Control/PanelContainer/MarginContainer/RotateControlGroup/SubViewportContainer/SubViewport/RotateControls" instance=ExtResource("8_rmwg0")]
+[node name="ArrowTorus6" parent="Control/PanelContainer/MarginContainer/ControlGroup/SubViewportContainer/SubViewport/RotateControls" instance=ExtResource("8_rmwg0")]
 transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 0, 0, -0.25)
 visible = false
 skeleton = NodePath("../../../../../../../..")
 metadata/axis = "x"
 metadata/dir = "L"
 
-[node name="Camera3D" type="Camera3D" parent="Control/PanelContainer/MarginContainer/RotateControlGroup/SubViewportContainer/SubViewport"]
+[node name="Camera3D" type="Camera3D" parent="Control/PanelContainer/MarginContainer/ControlGroup/SubViewportContainer/SubViewport"]
 transform = Transform3D(-0.707107, 0.5, -0.5, 0, 0.707107, 0.707107, 0.707107, 0.5, -0.5, -37, 10, -37)
 projection = 1
 fov = 30.0
 size = 4.0
 
-[node name="FlowContainer" type="FlowContainer" parent="Control/PanelContainer/MarginContainer/RotateControlGroup"]
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-alignment = 1
-vertical = true
-
-[node name="Button" type="Button" parent="Control/PanelContainer/MarginContainer/RotateControlGroup/FlowContainer"]
+[node name="Button2" type="Button" parent="Control/PanelContainer/MarginContainer/ControlGroup"]
 layout_mode = 2
 text = "Change layer direction"
 script = ExtResource("2_1uo3i")
 metadata/plane = "y"
+
+[node name="HSeparator" type="HSeparator" parent="Control/PanelContainer/MarginContainer/ControlGroup"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Button" type="Button" parent="Control/PanelContainer/MarginContainer/ControlGroup"]
+layout_mode = 2
+text = "Place X or O"
+script = ExtResource("1_ytx5r")
 
 [node name="RotateControlsHint" type="Label" parent="Control/PanelContainer/MarginContainer"]
 unique_name_in_owner = true
@@ -273,17 +294,6 @@ layout_mode = 2
 text = "Select a cube
 to show controls"
 horizontal_alignment = 1
-
-[node name="InputBlocker" type="PanelContainer" parent="Control"]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_o6j5u")
-script = ExtResource("5_je44m")
 
 [node name="PanelContainer2" type="PanelContainer" parent="Control"]
 layout_mode = 1
@@ -300,22 +310,38 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
+[node name="PlayerTurnText" type="Label" parent="Control/PanelContainer2/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+script = ExtResource("1_ym7lh")
+
 [node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer2/MarginContainer"]
 layout_mode = 2
 alignment = 1
 
-[node name="ExitButton" type="Button" parent="Control/PanelContainer2/MarginContainer/HBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer2/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="ExitButton" type="Button" parent="Control/PanelContainer2/MarginContainer/HBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 2
 text = "Back to Main Menu"
 script = ExtResource("6_hi3rp")
 
-[node name="PlayerTurnText" type="Label" parent="Control/PanelContainer2/MarginContainer/HBoxContainer"]
-unique_name_in_owner = true
+[node name="VSeparator" type="VSeparator" parent="Control/PanelContainer2/MarginContainer/HBoxContainer/HBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
-horizontal_alignment = 1
-script = ExtResource("1_ym7lh")
+theme_override_constants/separation = 10
+theme_override_styles/separator = SubResource("StyleBoxEmpty_s4so4")
+
+[node name="Mute" type="Button" parent="Control/PanelContainer2/MarginContainer/HBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Mute"
+script = ExtResource("6_tat81")
 
 [node name="TutorialHint" type="Button" parent="Control/PanelContainer2/MarginContainer/HBoxContainer"]
 unique_name_in_owner = true
@@ -439,7 +465,7 @@ text = "Restart"
 script = ExtResource("7_xljt2")
 
 [node name="CubeGen" type="RemoteTransform3D" parent="."]
-remote_path = NodePath("../Control/PanelContainer/MarginContainer/RotateControlGroup/SubViewportContainer/SubViewport/RotateControls")
+remote_path = NodePath("../Control/PanelContainer/MarginContainer/ControlGroup/SubViewportContainer/SubViewport/RotateControls")
 update_position = false
 update_scale = false
 script = ExtResource("1_wkfav")
@@ -456,3 +482,12 @@ environment = SubResource("Environment_356ov")
 transform = Transform3D(-0.707107, 0.5, -0.5, 0, 0.707107, 0.707107, 0.707107, 0.5, -0.5, -10, 15, -10)
 projection = 1
 size = 20.0
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+script = ExtResource("12_0cjwp")
+
+[node name="BGM" type="AudioStreamPlayer" parent="."]
+unique_name_in_owner = true
+stream = ExtResource("13_ljgf7")
+autoplay = true
+script = ExtResource("15_ahyhv")
