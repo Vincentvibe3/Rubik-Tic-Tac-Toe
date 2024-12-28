@@ -65,6 +65,9 @@ func close_ws():
 			return true
 	return false
 
+func is_client_turn():
+	return (is_host && currentPlayer == 0) || (!is_host && currentPlayer == 1)
+
 func go_to_menu():
 	is_multiplayer = false
 	is_host = false
@@ -135,7 +138,7 @@ func on_mark(local_normal, coord):
 	highlight_last_clicked()
 	if gameStarted:
 		if is_multiplayer:
-			if (is_host && currentPlayer == 0) || (!is_host && currentPlayer == 1):
+			if is_client_turn():
 				wshandler.send_mark(coord, local_normal)
 		GameState.changeTurn()
 
@@ -149,7 +152,7 @@ func on_rotate(axis, coord, direction):
 	reset_last_clicked()
 	if gameStarted:
 		if is_multiplayer:
-			if (is_host && currentPlayer == 0) || (!is_host && currentPlayer == 1):
+			if is_client_turn():
 				wshandler.send_rotate(axis, coord, direction)
 		GameState.changeTurn()
 
@@ -177,7 +180,7 @@ func setPlayerText():
 		else:
 			playerText = "X"
 			opponentText = "O"
-		if (is_host && currentPlayer == 0) || (!is_host && currentPlayer == 1):
+		if is_client_turn():
 			message = "Your turn ("+playerText+")"
 		else:
 			message = "Opponent's turn ("+opponentText+")"
@@ -195,11 +198,6 @@ func changeTurn():
 		checkBoard()
 		currentPlayer = (currentPlayer+1)%2
 		setPlayerText()
-		if is_multiplayer:
-			if (is_host && currentPlayer == 0) || (!is_host && currentPlayer == 1):
-				inputBlocker.allow_input()
-			else:
-				inputBlocker.block_input()
 		
 
 func setActiveGameCube(cube:CubeGenerator):

@@ -15,6 +15,9 @@ var t = 0
 
 func _input_event(_camera: Camera3D, event: InputEvent, _event_position: Vector3, normal: Vector3, _shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.is_pressed() and event.button_index == MOUSE_BUTTON_LEFT:
+		if GameState.is_multiplayer and GameState.gameStarted:
+			if !GameState.is_client_turn():
+				return
 		self.emit_signal("selected", normal)
 
 # Called when the node enters the scene tree for the first time.

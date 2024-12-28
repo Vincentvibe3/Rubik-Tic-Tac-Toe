@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://bx677n8nmdldy"]
+[gd_scene load_steps=31 format=3 uid="uid://bx677n8nmdldy"]
 
 [ext_resource type="Script" path="res://scripts/SetupOnline.gd" id="1_yams8"]
 [ext_resource type="Script" path="res://scripts/UpdateText.gd" id="2_yp0bt"]
@@ -7,7 +7,6 @@
 [ext_resource type="PackedScene" uid="uid://dutnhujkmabmb" path="res://scenes/Arrow.tscn" id="5_nor58"]
 [ext_resource type="Script" path="res://scripts/PlaceMove.gd" id="5_qxoxu"]
 [ext_resource type="Script" path="res://scripts/SetRotationAxis.gd" id="6_1coet"]
-[ext_resource type="Script" path="res://scripts/InputBlocker.gd" id="7_38q8f"]
 [ext_resource type="Script" path="res://scripts/ShowTutorial.gd" id="7_fi8u5"]
 [ext_resource type="Script" path="res://scripts/RegisterWinScreen.gd" id="8_nine6"]
 [ext_resource type="Script" path="res://scripts/ResetButton.gd" id="9_kwvqu"]
@@ -29,8 +28,6 @@ bg_color = Color(0.0627451, 0.0627451, 0.0627451, 0.443137)
 bg_color = Color(0, 0, 0, 0.392157)
 corner_radius_top_left = 10
 corner_detail = 10
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_o6j5u"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bpm36"]
 bg_color = Color(0, 0, 0, 0.392157)
@@ -304,17 +301,6 @@ layout_mode = 2
 text = "Select a cube
 to show controls"
 horizontal_alignment = 1
-
-[node name="InputBlocker" type="PanelContainer" parent="Control"]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_o6j5u")
-script = ExtResource("7_38q8f")
 
 [node name="PanelContainer2" type="PanelContainer" parent="Control"]
 layout_mode = 1
