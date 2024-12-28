@@ -10,7 +10,7 @@ var t = 0
 
 func set_target_transform(t_transform):
 	if !is_rotating:
-		create_tween().tween_property(self, "transform", t_transform, 1).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_IN_OUT).connect("finished", _on_rotation_done)
+		create_tween().tween_property(self, "transform", t_transform, 1).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT).connect("finished", _on_rotation_done)
 		is_rotating = true
 
 

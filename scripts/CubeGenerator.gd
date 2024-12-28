@@ -161,6 +161,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			else:
 				rotate(Vector3(0, 1, 0).normalized(), event.relative.x * 0.01) # first rotate in Y
 				rotate(Vector3(1, 0, -1).normalized(), -event.relative.y * 0.01)
+			self.transform = self.transform.orthonormalized()
 			
 	if event is InputEventMouseButton and event.is_released() and event.button_index == MOUSE_BUTTON_RIGHT:
 		isDragging = false
@@ -176,7 +177,7 @@ func _on_rotate_cube(value: float, axis: String):
 			hasMouseRotation = false
 			x_rotation = 2 * PI / 360 * float(value)
 			var x_rot_axis = Vector3(0,1,0).rotated(Vector3(1, 0, -1).normalized(), y_rotation)		
-			var target_transform = Transform3D.IDENTITY.rotated(x_rot_axis.normalized(), x_rotation).rotated(Vector3(-1, 0, 1).normalized(), y_rotation)
+			var target_transform = Transform3D.IDENTITY.rotated(x_rot_axis.normalized(), x_rotation).rotated(Vector3(-1, 0, 1).normalized(), y_rotation).orthonormalized()
 			tweenX.tween_property(self, "global_transform", target_transform, 0.4)
 			tweenX.connect("finished", func (): gameCubeRotationDone.emit())
 		else:
@@ -193,7 +194,7 @@ func _on_rotate_cube(value: float, axis: String):
 			hasMouseRotation = false
 			y_rotation= 2 * PI / 360 * float(value)
 			var x_rot_axis = Vector3(0,1,0).rotated(Vector3(1, 0, -1).normalized(), y_rotation)		
-			var target_transform = Transform3D.IDENTITY.rotated(x_rot_axis.normalized(), x_rotation).rotated(Vector3(-1, 0, 1).normalized(), y_rotation)
+			var target_transform = Transform3D.IDENTITY.rotated(x_rot_axis.normalized(), x_rotation).rotated(Vector3(-1, 0, 1).normalized(), y_rotation).orthonormalized()
 			tweenY.tween_property(self, "global_transform", target_transform, 0.4)
 			tweenY.connect("finished", func (): gameCubeRotationDone.emit())
 		else:
@@ -207,7 +208,7 @@ func get_rotation_interpolation(weight, axis):
 	elif axis == "x":
 		x_rotation = weight
 	var x_rot_axis = Vector3(0,1,0).rotated(Vector3(1, 0, -1).normalized(), y_rotation)		
-	self.global_transform = Transform3D.IDENTITY.rotated(x_rot_axis.normalized(), x_rotation).rotated(Vector3(-1, 0, 1).normalized(), y_rotation)
+	self.global_transform = Transform3D.IDENTITY.rotated(x_rot_axis.normalized(), x_rotation).rotated(Vector3(-1, 0, 1).normalized(), y_rotation).orthonormalized()
 
 func rotate_indices(axis_1: int, axis_2: int, coord):
 	if coord[axis_1] == 0 and coord[axis_2] == 0:
