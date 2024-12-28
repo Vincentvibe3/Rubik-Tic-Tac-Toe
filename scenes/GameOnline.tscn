@@ -99,7 +99,7 @@ offset_bottom = 121.0
 grow_horizontal = 2
 size_flags_horizontal = 4
 text = "Left Click to Select a cube
-Drag with Middle Click to rotate"
+Drag with Right Click to rotate"
 horizontal_alignment = 1
 
 [node name="Label2" type="Label" parent="Control/TutorialScreen/Control"]
