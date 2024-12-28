@@ -96,28 +96,28 @@ async def handle_client(websocket:WebSocket, room:Room, is_host:bool=False):
         await room.set_peer(websocket)
         try:
             await room.host.send_json({"id": 0, "payload":{}})
-        except WebSocketDisconnect:
+        except WebSocketDisconnect as e:
             await activeRooms.disconnect_room(room)
-            websocket.close(3004, "disconnected")
+            await send_disconnect(websocket, e)
             return
         try:
             await websocket.send_json({"id": 0, "payload":{}})
-        except WebSocketDisconnect:
+        except WebSocketDisconnect as e:
             await activeRooms.disconnect_room(room)
             if not await room.is_closed():
                 await room.close()
-                await peer.close(3004, "disconnected")
+                await send_disconnect(peer, e)
             return
     else:
         peer = await room.get_peer()
         try:
             await websocket.send_json({"id": 1, "payload":{"id":room.id}})
-        except WebSocketDisconnect:
+        except WebSocketDisconnect as e:
             await activeRooms.disconnect_room(room)
             if peer is not None:
                 if not await room.is_closed():
                     await room.close()
-                    await peer.close(3004, "disconnected")
+                    await send_disconnect(peer, e)
             return
         
 
@@ -125,13 +125,13 @@ async def handle_client(websocket:WebSocket, room:Room, is_host:bool=False):
         # forward messages
         try:
             data = await websocket.receive_json()
-        except WebSocketDisconnect:
+        except WebSocketDisconnect as e:
             if peer is None and is_host:
                 peer = await room.get_peer()
             if peer is not None:
                 if not await room.is_closed():
                     await room.close()
-                    await peer.close(3004, "disconnected")
+                    await send_disconnect(peer, e)
             else:
                 await room.close()
                 await activeRooms.disconnect_room(room)
@@ -142,9 +142,18 @@ async def handle_client(websocket:WebSocket, room:Room, is_host:bool=False):
             continue 
         try:
             await peer.send_json(data)
-        except WebSocketDisconnect:
-            await websocket.close(3004, "disconnected")
+        except WebSocketDisconnect as e:
+            await send_disconnect(websocket, e)
             return
+
+async def send_disconnect(websocket, e):
+    if e.code == 3007 or e.code ==3008:
+        code = e.code
+        reason = e.reason
+    else:
+        code = 3004
+        reason = "disconnected"
+    await websocket.close(code, reason)
 
 @app.websocket("/connect")
 async def new_client(websocket:WebSocket):
