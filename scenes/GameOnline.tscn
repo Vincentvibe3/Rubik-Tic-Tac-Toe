@@ -225,7 +225,6 @@ size_flags_vertical = 4
 [node name="SubViewport" type="SubViewport" parent="Control/PanelContainer/MarginContainer/ControlGroup/SubViewportContainer"]
 transparent_bg = true
 handle_input_locally = false
-msaa_2d = 3
 msaa_3d = 3
 physics_object_picking = true
 size = Vector2i(100, 100)
@@ -392,6 +391,7 @@ pivot_offset = Vector2(8, 125)
 layout_mode = 2
 size_flags_horizontal = 4
 max_value = 360.0
+step = 45.0
 script = ExtResource("3_l78yf")
 metadata/axis = "y"
 
@@ -413,6 +413,7 @@ grow_vertical = 0
 layout_mode = 2
 size_flags_stretch_ratio = 0.0
 max_value = 360.0
+step = 45.0
 script = ExtResource("3_l78yf")
 metadata/axis = "x"
 

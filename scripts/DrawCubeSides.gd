@@ -86,8 +86,6 @@ func reset_selection():
 		selectedDecal = null
 
 func get_face(local_normal):
-	print("local")
-	print(local_normal)
 	var size = $CubeMesh.get_aabb().get_longest_axis_size()
 	var faces = [
 		[Vector3.RIGHT, Vector3(size/2, 0, 0)],
@@ -132,10 +130,8 @@ func drawDecal(face_data, local_normal, decal):
 func drawSelect():
 	if selectedFace != null:
 		var face_data = get_face(selectedFace)
-		print(face_data)
 		var decal:Decal = Decal.new()	
 		selectedDecal = decal
-		print(selectedDecal)
 		decal.texture_albedo = load("res://Textures/Selection.png")
 		drawDecal(face_data, selectedFace, decal)
 

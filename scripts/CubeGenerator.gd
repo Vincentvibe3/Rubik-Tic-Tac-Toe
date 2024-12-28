@@ -12,19 +12,23 @@ signal gameCubeRotationDone()
 var rotatingLayer = false
 var rotationGroup = RotationGroup.new()
 var targetCubeTransform
-var tween
+var tweenY
 var current_selection
 var cubes = []
 var cubeSize
 var currentRotationAxis = "x"
 var auto = false
 var isDragging = false
+var tweenX
+var tweenMouse
 
 var lastRotationDirection = "L"
 
-var x_rotation = 0
-var y_rotation = 0
-
+var x_rotation = 0.0
+var y_rotation = 0.0
+var xMove = 0
+var yMove = 0
+var hasMouseRotation = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -144,38 +148,67 @@ func _on_set_rotation_axis(axis: String):
 	render3DControls()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.is_pressed() and event.button_index == MOUSE_BUTTON_MIDDLE:
+	if event is InputEventMouseButton and event.is_pressed() and event.button_index == MOUSE_BUTTON_RIGHT:
 		isDragging = true
+		xMove = event.position.x
+		yMove = event.position.y
 	if event is InputEventMouseMotion:
 		if isDragging:
-			_rotate_drag(event.velocity.x, event.velocity.y)
+			hasMouseRotation = true
+			if abs(event.relative.x) > abs(event.relative.y):
+				rotate(Vector3(1, 0, -1).normalized(), -event.relative.y * 0.01)
+				rotate(Vector3(0, 1, 0).normalized(), event.relative.x * 0.01) # first rotate in Y
+			else:
+				rotate(Vector3(0, 1, 0).normalized(), event.relative.x * 0.01) # first rotate in Y
+				rotate(Vector3(1, 0, -1).normalized(), -event.relative.y * 0.01)
 			
-	if event is InputEventMouseButton and event.is_released() and event.button_index == MOUSE_BUTTON_MIDDLE:
+	if event is InputEventMouseButton and event.is_released() and event.button_index == MOUSE_BUTTON_RIGHT:
 		isDragging = false
 
-func _rotate_drag(x_delta:float, y_delta:float):
-	var y_rotation_delta=y_delta*0.001
-	var x_rotation_delta=x_delta*0.001
-	# tween = get_tree().create_tween()
-	targetCubeTransform = self.global_transform.rotated(Vector3(0, 1, 0).normalized(), x_rotation_delta)
-	targetCubeTransform = targetCubeTransform.rotated(Vector3(-1, 0, 1).normalized(), y_rotation_delta)
-	self.global_transform = targetCubeTransform.orthonormalized()
-	# tween.tween_property(self, "global_transform", targetCubeTransform, 0.25).set_ease(Tween.EASE_OUT)
-	# tween.connect("finished", func (): gameCubeRotationDone.emit())
-
 func _on_rotate_cube(value: float, axis: String):
-	if tween:
-		tween.kill()
+	var initial_x = x_rotation
+	var initial_y = y_rotation
 	if axis == "x":
-		x_rotation = 2 * PI / 360 * value
+		if tweenX:
+			tweenX.kill()
+		tweenX = get_tree().create_tween()
+		if hasMouseRotation:
+			hasMouseRotation = false
+			x_rotation = 2 * PI / 360 * float(value)
+			var x_rot_axis = Vector3(0,1,0).rotated(Vector3(1, 0, -1).normalized(), y_rotation)		
+			var target_transform = Transform3D.IDENTITY.rotated(x_rot_axis.normalized(), x_rotation).rotated(Vector3(-1, 0, 1).normalized(), y_rotation)
+			tweenX.tween_property(self, "global_transform", target_transform, 0.4)
+			tweenX.connect("finished", func (): gameCubeRotationDone.emit())
+		else:
+			var target_x_rotation = 2 * PI / 360 * float(value)
+			tweenX.tween_method(get_rotation_interpolation.bind(axis), initial_x, target_x_rotation, 0.4)
+			tweenX.connect("finished", func (): gameCubeRotationDone.emit())
+
 	elif axis == "y":
-		y_rotation = 2 * PI / 360 * value
-	tween = get_tree().create_tween()
-	targetCubeTransform = Transform3D.IDENTITY.rotated(Vector3(0, 1, 0).normalized(), x_rotation)
-	targetCubeTransform = targetCubeTransform.rotated(Vector3(-1, 0, 1).normalized(), y_rotation)
-	tween.tween_property(self, "global_transform", targetCubeTransform, 0.5).set_ease(Tween.EASE_OUT)
-	tween.connect("finished", func (): gameCubeRotationDone.emit())
-	
+		if tweenY:
+			tweenY.kill()
+		tweenY = get_tree().create_tween()
+
+		if hasMouseRotation:
+			hasMouseRotation = false
+			y_rotation= 2 * PI / 360 * float(value)
+			var x_rot_axis = Vector3(0,1,0).rotated(Vector3(1, 0, -1).normalized(), y_rotation)		
+			var target_transform = Transform3D.IDENTITY.rotated(x_rot_axis.normalized(), x_rotation).rotated(Vector3(-1, 0, 1).normalized(), y_rotation)
+			tweenY.tween_property(self, "global_transform", target_transform, 0.4)
+			tweenY.connect("finished", func (): gameCubeRotationDone.emit())
+		else:
+			var target_y_rotation = 2 * PI / 360 * float(value)
+			tweenY.tween_method(get_rotation_interpolation.bind(axis), initial_y, target_y_rotation, 0.4)
+			tweenY.connect("finished", func (): gameCubeRotationDone.emit())
+
+func get_rotation_interpolation(weight, axis):
+	if axis == "y":
+		y_rotation = weight
+	elif axis == "x":
+		x_rotation = weight
+	var x_rot_axis = Vector3(0,1,0).rotated(Vector3(1, 0, -1).normalized(), y_rotation)		
+	self.global_transform = Transform3D.IDENTITY.rotated(x_rot_axis.normalized(), x_rotation).rotated(Vector3(-1, 0, 1).normalized(), y_rotation)
+
 func rotate_indices(axis_1: int, axis_2: int, coord):
 	if coord[axis_1] == 0 and coord[axis_2] == 0:
 		coord[axis_1] = 2

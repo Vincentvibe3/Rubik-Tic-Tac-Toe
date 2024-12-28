@@ -20,7 +20,7 @@ func _ready() -> void:
 	cube.gameCubeRotationDone.connect(_on_game_cube_rotate_done)
 
 func _on_game_cube_rotate_done():
-	cube._on_rotate_cube(randi()%360, gameCubeAxes[randi()%2])
+	cube._on_rotate_cube(randi()%180, gameCubeAxes[randi()%2])
 
 func _on_rotate_done():
 	cube._on_select(cube.cubes[randi()%(len(cube.cubes))])

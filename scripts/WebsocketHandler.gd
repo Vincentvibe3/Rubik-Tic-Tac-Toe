@@ -10,6 +10,14 @@ var id
 var active = true
 var actions = []
 
+var timer = Timer.new()
+var lastKeepAlive
+var lastPlayerMoveTime
+
+var keepAliveTimeout = 2
+var idleTimeout = 5
+
+
 static func createHost(rName, password):
 	return GameConnection.new(rName, password, null, true)
 
@@ -27,6 +35,10 @@ func _init(rName, password, rId, host) -> void:
 
 func _ready():
 	GameState.wshandler = self
+	add_child(timer)
+	timer.timeout.connect(_queue_keep_alive)
+	lastKeepAlive = null
+	lastPlayerMoveTime = null
 	# Initiate connection to the given URL.
 	var ws_url
 	if GameState.isInsecure:
@@ -54,7 +66,6 @@ func send_room_creation():
 	if roomPassword != null:
 		payload["password"] = roomPassword
 	send({"id":0, "payload":payload})
-	# socket.send_text(JSON.stringify({"id":0, "payload":payload}))
 
 func send_room_connect():
 	var payload = {
@@ -63,7 +74,21 @@ func send_room_connect():
 	if roomPassword != null:
 		payload["password"] = roomPassword
 	send({"id":1, "payload":payload})
-	# socket.send_text(JSON.stringify({"id":1, "payload":payload}))
+
+func _queue_keep_alive():
+	send({"id":5, "payload":{}})
+
+func send_mark(coord, local_normal):
+	lastPlayerMoveTime = Time.get_ticks_msec()
+	send({"id":2, "payload":{"coord":coord, "normal":[local_normal.x, local_normal.y, local_normal.z]}})
+
+func send_rotate(axis, coord, direction):
+	lastPlayerMoveTime = Time.get_ticks_msec()
+	send({"id":3, "payload":{"axis":axis, "coord":coord, "direction":direction}})
+
+func send_reset():
+	lastPlayerMoveTime = Time.get_ticks_msec()
+	send({"id":4,"payload":{}})
 
 func _process(_delta):
 	# Call this in _process or _physics_process. Data transfer and state updates
@@ -76,6 +101,12 @@ func _process(_delta):
 	# WebSocketPeer.STATE_OPEN means the socket is connected and ready
 	# to send and receive data.
 	if state == WebSocketPeer.STATE_OPEN:
+		if lastKeepAlive != null:
+			if Time.get_ticks_msec()-lastKeepAlive > keepAliveTimeout*60000:
+				socket.close(3007, "inactive client detected")
+		if lastPlayerMoveTime != null:
+			if Time.get_ticks_msec()-lastPlayerMoveTime > idleTimeout*60000:
+				socket.close(3008, "Inactive user detected")
 		while socket.get_available_packet_count():
 			var data = socket.get_packet().get_string_from_utf8()
 			var json = JSON.parse_string(data)
@@ -85,6 +116,9 @@ func _process(_delta):
 			var packetId = json["id"]
 			var payload = json["payload"]
 			if packetId == 0:
+				lastKeepAlive = Time.get_ticks_msec()
+				lastPlayerMoveTime = Time.get_ticks_msec()
+				timer.start(60)
 				GameState.showMultiplayerLoadingScreen = false
 			elif packetId == 1:
 				if "id" not in payload:
@@ -96,11 +130,13 @@ func _process(_delta):
 					socket.close(3006, "client received invalid data")
 					continue
 				var normal = payload["normal"]
+				lastPlayerMoveTime = Time.get_ticks_msec()
 				GameState.mark_face(payload["coord"], Vector3(normal[0], normal[1], normal[2]))
 			elif packetId == 3:
 				if "axis" not in payload || "coord" not in payload || "direction" not in payload:
 					socket.close(3006, "client received invalid data")
 					continue
+				lastPlayerMoveTime = Time.get_ticks_msec()
 				GameState.rotate_cube(payload["axis"], payload["coord"], payload["direction"])
 			elif packetId == 4:
 				if "id" not in json or "payload" not in json:
@@ -108,10 +144,11 @@ func _process(_delta):
 					continue
 				GameState.roundEnded = false
 				GameState.reset()
+			elif packetId == 5:
+				lastKeepAlive = Time.get_ticks_msec()
 			else:
 				socket.close(3006, "client received invalid data")
-			# print("Got data from server: ", data)
-		if actions:
+		while actions:
 			socket.send_text(JSON.stringify(actions.pop_front()))
 
 	# WebSocketPeer.STATE_CLOSING means the socket is closing.
@@ -164,6 +201,30 @@ func _process(_delta):
 		elif code == 3006:
 			var errorScreen = load("res://scenes/ErrorScreen.tscn").instantiate()
 			errorScreen.errorText = "Game received invalid data"
+			var oldScene = get_tree().current_scene
+			var tree = get_tree()
+			tree.root.remove_child(oldScene)
+			tree.root.add_child(errorScreen)
+			tree.current_scene = errorScreen
+		elif code == 3007:
+			var errorScreen = load("res://scenes/ErrorScreen.tscn").instantiate()
+			errorScreen.errorText = "Lost connection to opponent game"
+			var oldScene = get_tree().current_scene
+			var tree = get_tree()
+			tree.root.remove_child(oldScene)
+			tree.root.add_child(errorScreen)
+			tree.current_scene = errorScreen
+		elif code == 3008:
+			var errorScreen = load("res://scenes/ErrorScreen.tscn").instantiate()
+			errorScreen.errorText = "Game closed due to inactivity"
+			var oldScene = get_tree().current_scene
+			var tree = get_tree()
+			tree.root.remove_child(oldScene)
+			tree.root.add_child(errorScreen)
+			tree.current_scene = errorScreen
+		else:
+			var errorScreen = load("res://scenes/ErrorScreen.tscn").instantiate()
+			errorScreen.errorText = "An error occurred"
 			var oldScene = get_tree().current_scene
 			var tree = get_tree()
 			tree.root.remove_child(oldScene)

@@ -114,7 +114,6 @@ func highlight_last_clicked():
 	if lastClickedCube != null:
 		for cube in cubes:
 			if cube.cube_position[0] == coord[0] && cube.cube_position[1] == coord[1] && cube.cube_position[2] == coord[2]:
-				print("highlighted")
 				cube.highlight(lastMoveMaterial)
 
 func reset_last_clicked():
@@ -137,7 +136,7 @@ func on_mark(local_normal, coord):
 	if gameStarted:
 		if is_multiplayer:
 			if (is_host && currentPlayer == 0) || (!is_host && currentPlayer == 1):
-				wshandler.send({"id":2, "payload":{"coord":coord, "normal":[local_normal.x, local_normal.y, local_normal.z]}})
+				wshandler.send_mark(coord, local_normal)
 		GameState.changeTurn()
 
 func _on_rotate_start():
@@ -151,7 +150,7 @@ func on_rotate(axis, coord, direction):
 	if gameStarted:
 		if is_multiplayer:
 			if (is_host && currentPlayer == 0) || (!is_host && currentPlayer == 1):
-				wshandler.send({"id":3, "payload":{"axis":axis, "coord":coord, "direction":direction}})
+				wshandler.send_rotate(axis, coord, direction)
 		GameState.changeTurn()
 
 func startGame():
@@ -164,9 +163,7 @@ func setTextNode(node):
 
 func setPlayerText():
 	if !gameStarted:
-		print("set tutorual text")
 		if textNode != null:
-			print("set tutorual text")
 			textNode.text = "Tutorial"
 			return
 	var message
@@ -211,7 +208,7 @@ func setActiveGameCube(cube:CubeGenerator):
 
 func reset():
 	if roundEnded && is_multiplayer:
-		wshandler.send({"id":4,"payload":{}})
+		wshandler.send_reset()
 		roundEnded = false
 	reset_last_clicked()
 	gameCube.reset()
